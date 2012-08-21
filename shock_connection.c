@@ -48,6 +48,14 @@ static int shockCurlExecute(ShockConnection *conn){
   return 0;
 }
 
+static void shockInitCurl(ShockConnection *conn, ShockConfig *conf){
+  curl_easy_setopt(conn->curl_handle, CURLOPT_USERNAME, conf->username);
+  curl_easy_setopt(conn->curl_handle, CURLOPT_PASSWORD, conf->password);
+  curl_easy_setopt(conn->curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+  curl_easy_setopt(conn->curl_handle, CURLOPT_WRITEFUNCTION, shockCurlWriteHandler);
+  curl_easy_setopt(conn->curl_handle, CURLOPT_WRITEDATA, conn);
+}
+
 int shockConnectionNew(ShockConnection *conn, ShockConfig *conf){
   assert(NULL != conn);
   memcpy(&conn->shock_config, conf, sizeof(ShockConfig));
@@ -62,19 +70,17 @@ int shockConnectionNew(ShockConnection *conn, ShockConfig *conf){
   if(json_parser_init(&conn->json_parser, NULL, shockJParseCallback, conn))
     return SHOCK_JSON_PARSER_INIT_ERROR;
   
-  curl_easy_setopt(conn->curl_handle, CURLOPT_USERNAME, conf->username);
-  curl_easy_setopt(conn->curl_handle, CURLOPT_PASSWORD, conf->password);
-  curl_easy_setopt(conn->curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-  curl_easy_setopt(conn->curl_handle, CURLOPT_WRITEFUNCTION, shockCurlWriteHandler);
-  curl_easy_setopt(conn->curl_handle, CURLOPT_WRITEDATA, conn);
+  shockInitCurl(conn, &(conn->shock_config));
     
   return 0;
 }
 
-void shockSetDataHandler(ShockConnection *conn, ShockDataType data_type, FILE *dataDest){
+
+
+void shockSetDataHandler(ShockConnection *conn, ShockDataType data_type, FILE *data_dest){
   assert( NULL != conn );
   conn -> output_settings -> output_type = data_type;
-  conn -> output_settings -> output_handle = dataDest;
+  conn -> output_settings -> output_handle = data_dest;
 }
 
 
@@ -169,6 +175,49 @@ int shockQueryNode(ShockConnection *conn, const char *queries[], int num_queries
 
 }
 
+int shockCreateNode(ShockConnection *conn, const char *upload_file_name,
+		    const char *json_file_name){
+  assert( NULL != conn);
+  assert( NULL != upload_file_name);
+
+  char *server = conn->shock_config.server;
+  char *node_s = "/node";
+  char *url = malloc(strlen(node_s) + 
+		     strlen(server));
+  strcat(url,server);
+  strcat(url,node_s);
+  
+  if(conn -> shock_config.debug)
+    fprintf(stderr, "DEBUG shock url: %s\n", url);
+  
+  curl_easy_setopt(conn->curl_handle, CURLOPT_URL, url);
+
+  struct curl_httppost *formpost = NULL;
+  struct curl_httppost *lastptr = NULL;
+  
+  //upload a file if it exists
+  if( NULL != upload_file_name){
+    curl_formadd(&formpost, &lastptr,
+		 CURLFORM_COPYNAME, "upload",
+		 CURLFORM_FILE, upload_file_name,
+		 CURLFORM_END);
+  }  
+  //add attributes if they exist
+  if(NULL != json_file_name){
+    curl_formadd(&formpost, &lastptr, 
+		 CURLFORM_COPYNAME, "attributes",
+		 CURLFORM_FILE, json_file_name,
+		 CURLFORM_END);
+  }  
+  
+  curl_easy_setopt(conn->curl_handle, CURLOPT_HTTPPOST, formpost);
+  
+  int ret = shockCurlExecute(conn);
+  free(url);
+  return ret;
+}
+
+
 int shockDownloadFile(ShockConnection *conn, const char *node_id){
   assert( NULL != conn );
   assert( NULL != node_id );
@@ -215,4 +264,10 @@ ShockOutputSettings *shockOutputSettingsNewDefault(){
 void shockOutputSettingsFree(ShockOutputSettings *settings){
   assert(NULL != settings);
   free(settings);
+}
+
+void shockHandleReset(ShockConnection *conn){
+  assert( NULL != conn );
+  curl_easy_reset(conn->curl_handle);
+  shockInitCurl(conn, &(conn->shock_config));
 }
