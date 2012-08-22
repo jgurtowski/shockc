@@ -20,6 +20,7 @@ static int shockJPrintCallback(void *userdata, const char *s, uint32_t len){
 static int shockJParseCallback(void *userdata, int type, const char *data, uint32_t len){
   ShockConnection *conn = (ShockConnection *)userdata;
   json_print_pretty(&conn->json_printer, type, data,len);
+  return 0;
 }
 
 static size_t shockCurlWriteHandler(char *ptr, size_t size,

@@ -1,0 +1,29 @@
+Dependencies:
+  libcurl - usually already installed on most machines
+
+1. Setup Environment:
+ An environment script shock_env.sh is in the root directory of the project.
+ Edit this file and add your shock username, password as well as the 
+ url for the shock server you want to interact with.
+ Now source the shock_env.sh to export the proper environment variables.
+ 
+   $>source shock_env.sh
+
+
+2. Build Client:
+  Execute the make command in the root of the project
+      
+    $>make
+
+  A binary shockc should be created, run it without parameters to view help.
+  In addition to the shockc binary, a libshockc.so library is also built.
+  This library can be helpful if you need programmatic access to shock.
+
+libshockc:
+  Documentation is sparse. Take a look at shock_connection.h most of the
+  action takes place there. Also look at the main.c file to see how
+  the library is used.
+ 
+
+
+

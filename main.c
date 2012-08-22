@@ -40,7 +40,7 @@ int main(int argc, char *argv[]){
   ShockConfig s_config;
   memset(&s_config,0,sizeof(ShockConfig));
   
-  if(err = getShockConfigFromEnvironment(&s_config))
+  if((err = getShockConfigFromEnvironment(&s_config)))
     return printError(err,stderr);
 
   ShockDataType data_type = SHOCK_UNSET;
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]){
   }
 
   ShockConnection s_conn;
-  if(err = shockConnectionNew(&s_conn,&s_config))
+  if((err = shockConnectionNew(&s_conn,&s_config)))
     return printError(err,stderr);
 
   if(data_type != SHOCK_UNSET)
@@ -88,10 +88,10 @@ int main(int argc, char *argv[]){
   shockSetDataHandlerFile(&s_conn, outfile);
   
   if(0 == strcmp(argv[first_optind],"list-nodes")){
-    if(err =shockGetNodes(&s_conn))
+    if((err =shockGetNodes(&s_conn)))
       printError(err,stderr);
   }else if(0 == strcmp(argv[first_optind],"list-users")){
-    if(err = shockGetUsers(&s_conn))
+    if((err = shockGetUsers(&s_conn)))
       printError(err,stderr);
   }else if(0 == strcmp(argv[first_optind],"create-node")){
     if( argc - first_optind <= 1 ){
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]){
 	}
       }
       if(!parse_error){
-	if(err = shockCreateNode(&s_conn, upload_file, attributes))
+	if((err = shockCreateNode(&s_conn, upload_file, attributes)))
 	  printError(err,stderr);
       }
     }
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]){
 	}
       }
       if(!parse_error)
-	if(err = shockQueryNode(&s_conn, queries, num_queries))
+	if((err = shockQueryNode(&s_conn, queries, num_queries)))
 	  printError(err,stderr);
       free(queries);
     }
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]){
 	}
       }
       if(!parse_error)
-	if(err = shockDownloadFile(&s_conn,node_id))
+	if((err = shockDownloadFile(&s_conn,node_id)))
 	  printError(err,stdout);
     }
   }else if(0 == strcmp(argv[first_optind],"get-node")){
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]){
 	  }
 	}
 	if(!parse_error)
-	  if(err = shockGetNode(&s_conn,node_id))
+	  if((err = shockGetNode(&s_conn,node_id)))
 	    printError(err,stdout);
       }
   }
