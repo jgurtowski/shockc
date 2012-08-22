@@ -2,7 +2,7 @@
 export SHOCK_USERNAME=james
 
 #password for shock
-export SHOCK_PASSWORD=1234
+export SHOCK_PASSWORD=3333
 
 #http url for shock, including port
 export SHOCK_SERVER=http://192.168.0.0:8000
