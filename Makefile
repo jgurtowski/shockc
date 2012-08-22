@@ -14,7 +14,7 @@ shockc: $(BIN_OBJECTS)
 	$(CC) $(LIB) $(CFLAGS) $(BIN_OBJECTS) -o shockc
 
 libshockc: $(LIB_OBJECTS)
-	$(CC) $(LIB) $(CFLAGS) -shared $(LIB_OBJECTS) -o libshockc.so
+	$(CC) $(LIB) $(CFLAGS) -fpic -shared $(LIB_OBJECTS) -o libshockc.so
 
 clean:
 	rm -f *.o shockc libshockc.so
