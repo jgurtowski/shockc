@@ -10,6 +10,7 @@
  * Output types handled by the shock client
  */
 typedef enum ShockDataType_enum{
+  SHOCK_UNSET,
   SHOCK_JSON,
   SHOCK_RAW
 }ShockDataType;
@@ -65,7 +66,7 @@ int shockGetNode(ShockConnection *conn, const char *node_id);
 /**
  *Query a node, an array of queries can be given, they will be combined into an "and" query
  */
-int shockQueryNode(ShockConnection *conn, const char *queries[], int num_queries);
+int shockQueryNode(ShockConnection *conn, const char **queries, int num_queries);
 
 /**
  * Given a node id, download the contents of the file associated with the node
@@ -75,9 +76,15 @@ int shockDownloadFile(ShockConnection *conn, const char *node_id);
 /**
  * Change how server responses will be handled by the client.
  * @data_type how the output will be displayed on the client
+ */
+void shockSetDataHandlerType(ShockConnection *conn, ShockDataType data_type);
+
+
+/**
+ * Change how server responses will be handled by the client.
  * @data_dest the output file where data will be stored
  */
-void shockSetDataHandler(ShockConnection *conn, ShockDataType data_type, FILE *data_dest);
+void shockSetDataHandlerFile(ShockConnection *conn, FILE *data_dest);
 
 /**
  *Create a node in shock
@@ -90,8 +97,6 @@ int shockCreateNode(ShockConnection *conn, const char *upload_file_name, const c
  *Resets all settings from previous reqests, allows ShockConnection handle reuse
  */
 void shockHandleReset(ShockConnection *conn);
-
-
 
 /**
  * Creates a new output setting structure on the heap

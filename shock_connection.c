@@ -75,11 +75,13 @@ int shockConnectionNew(ShockConnection *conn, ShockConfig *conf){
   return 0;
 }
 
-
-
-void shockSetDataHandler(ShockConnection *conn, ShockDataType data_type, FILE *data_dest){
+void shockSetDataHandlerType(ShockConnection *conn, ShockDataType data_type){
   assert( NULL != conn );
   conn -> output_settings -> output_type = data_type;
+}
+
+void shockSetDataHandlerFile(ShockConnection *conn, FILE *data_dest){
+  assert( NULL != conn );
   conn -> output_settings -> output_handle = data_dest;
 }
 
@@ -140,7 +142,7 @@ int shockGetNode(ShockConnection *conn, const char *node_id){
   return ret;
 }
 
-int shockQueryNode(ShockConnection *conn, const char *queries[], int num_queries){
+int shockQueryNode(ShockConnection *conn, const char **queries, int num_queries){
   assert( NULL != conn);
   assert(num_queries > 0);
 
@@ -178,7 +180,6 @@ int shockQueryNode(ShockConnection *conn, const char *queries[], int num_queries
 int shockCreateNode(ShockConnection *conn, const char *upload_file_name,
 		    const char *json_file_name){
   assert( NULL != conn);
-  assert( NULL != upload_file_name);
 
   char *server = conn->shock_config.server;
   char *node_s = "/node";
